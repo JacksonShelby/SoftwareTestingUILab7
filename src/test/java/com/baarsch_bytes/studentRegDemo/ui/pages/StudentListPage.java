@@ -89,4 +89,35 @@ public class StudentListPage {
         }
         return "concat('" + text.replace("'", "', \"'\", '") + "')";
     }
+
+    public void clickEdit(long id) {
+        driver.findElement(By.xpath("//tr[@id='student-row-" + id
+                + "']//button[normalize-space()='Edit']")).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("edit-student-major")));
+    }
+
+    public void setEditMajor(String major) {
+        WebElement input = driver.findElement(By.id("edit-student-major"));
+        input.clear();
+        input.sendKeys(major);
+    }
+
+    public void saveEdit() {
+        driver.findElement(By.id("edit-student-save-button")).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("edit-student-save-button")));
+    }
+
+    public void clickDelete(long id) {
+        driver.findElement(By.xpath("//tr[@id='student-row-" + id
+                + "']//button[normalize-space()='Delete']")).click();
+    }
+
+    public void waitForRowGone(long id) {
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("student-row-" + id)));
+    }
+
+    public void cancelEdit() {
+        driver.findElement(By.id("edit-student-cancel-button")).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("edit-student-cancel-button")));
+    }
 }
