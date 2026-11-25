@@ -5,6 +5,8 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.TimeoutException;
+import java.time.Duration;
 
 import java.util.List;
 
@@ -119,5 +121,67 @@ public class StudentListPage {
     public void cancelEdit() {
         driver.findElement(By.id("edit-student-cancel-button")).click();
         wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("edit-student-cancel-button")));
+    }
+
+    private static By nameCellContaining(String text) {
+        return By.xpath("//td[starts-with(@id,'student-name-') and contains(normalize-space(.), "
+                + xpathLiteral(text) + ")]");
+    }
+
+    /** True if a row whose name contains this text appears within the timeout. */
+    public boolean rowContainingAppearsWithin(String text, Duration timeout) {
+        try {
+            new WebDriverWait(driver, timeout)
+                    .until(ExpectedConditions.visibilityOfElementLocated(nameCellContaining(text)));
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    public boolean hasRowContaining(String text) {
+        return !driver.findElements(nameCellContaining(text)).isEmpty();
+    }
+
+    public String nameInputValue()  { return driver.findElement(NAME_INPUT).getDomProperty("value"); }
+    public String majorInputValue() { return driver.findElement(MAJOR_INPUT).getDomProperty("value"); }
+    public String gpaInputValue()   { return driver.findElement(GPA_INPUT).getDomProperty("value"); }
+
+    /** True if the name field becomes empty within the timeout (the form was cleared). */
+    public boolean formClearedWithin(Duration timeout) {
+        try {
+            new WebDriverWait(driver, timeout).until(
+                    d -> "".equals(d.findElement(NAME_INPUT).getDomProperty("value")));
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    public void setEditName(String name) { type(By.id("edit-student-name"), name); }
+    public void setEditGpa(String gpa)   { type(By.id("edit-student-gpa"), gpa); }
+
+    /** Clicks Save without waiting for the edit form to close (a failed save may leave it open). */
+    public void clickSave() {
+        driver.findElement(By.id("edit-student-save-button")).click();
+    }
+
+    public void waitForMajor(long id, String expected) {
+        wait.until(ExpectedConditions.textToBe(By.id("student-major-" + id), expected));
+    }
+
+    public void waitForGpa(long id, String expected) {
+        wait.until(ExpectedConditions.textToBe(By.id("student-gpa-" + id), expected));
+    }
+
+    /** True if the GPA cell shows something other than `original` within the timeout. */
+    public boolean gpaChangesFromWithin(long id, String original, Duration timeout) {
+        try {
+            new WebDriverWait(driver, timeout).until(ExpectedConditions.not(
+                    ExpectedConditions.textToBe(By.id("student-gpa-" + id), original)));
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 }

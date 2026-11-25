@@ -3,6 +3,7 @@ package com.baarsch_bytes.studentRegDemo.ui;
 import com.baarsch_bytes.studentRegDemo.ui.pages.StudentListPage;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.junit.jupiter.api.Tag;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,5 +61,16 @@ class FixedExamplesIT extends UiTestBase {
         page.waitForRowGone(deleteId);
         assertTrue(driver.findElements(By.id("student-row-" + deleteId)).isEmpty());
         assertFalse(driver.findElements(By.id("student-row-" + keepId)).isEmpty());
+    }
+
+    @Tag("examples") // Part 1 rewrite of studentTableHasData
+    @Test
+    void studentTable_showsCreatedStudentData() {
+        StudentListPage page = new StudentListPage(driver, wait, BASE_URL);
+        String name = unique("Table Check");
+        long id = createStudent(page, name, "History", "2.5");
+        assertEquals(name, page.nameOf(id));
+        assertEquals("History", page.majorOf(id));
+        assertEquals("2.5", page.gpaOf(id));
     }
 }
